@@ -12,7 +12,7 @@ public class PlayerContoller : MonoBehaviour
 
     const float constGravity = -9.81f;
     const float jumpSpeed = 1.0f;
-    const float fallSpeed = 2.0f;
+    const float fallSpeed = 4.0f;
     const float moveSpeed = 2.0f;
 
     public Vector3 gravity;

@@ -1,26 +1,37 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerContoller : MonoBehaviour
 {
+    CharacterController controller;
+    public GameObject groundCheck;
+    public Text debug1;
+    public Text debug2;
+
     const float constGravity = -9.81f;
-    public float moveSpeed = 2.0f;
+    const float jumpSpeed = 1.0f;
+    const float fallSpeed = 2.0f;
+    const float moveSpeed = 2.0f;
+
     public Vector3 gravity;
-    CharacterController Controller;
     public bool onGround;
+    public bool flying;
     public bool floating;
     public float onAirTime = 0.0f;
-    public GameObject groundCheck;
-    public float jumpHeight = 1000.0f;
+    public float jumpHeight = 10.0f;
+    public float power = 0f;
+
+
     // Start is called before the first frame update
     void Start()
     {
-        Controller = GetComponent<CharacterController>();
+        controller = GetComponent<CharacterController>();
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         Control();
     }
@@ -29,30 +40,26 @@ public class PlayerContoller : MonoBehaviour
     {
         onGround = Physics.CheckSphere(groundCheck.transform.position, 0.4f, LayerMask.GetMask("Ground"));
         Vector3 Move = new Vector3();
-        Move += transform.forward * Input.GetAxis("Vertical") * moveSpeed * Time.deltaTime;
-        Move += transform.right * Input.GetAxis("Horizontal") * moveSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.W)) Move += transform.forward * moveSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.S)) Move -= transform.forward * moveSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.A)) Move -= transform.right * moveSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.D)) Move += transform.right * moveSpeed * Time.deltaTime;
         //Jump
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && onGround)
         {
-            //https://math.stackexchange.com/questions/222578/how-to-calculate-initial-jump-velocity-for-reaching-specific-height
-            //v=√2gh
-            gravity.y = Mathf.Sqrt(jumpHeight * -2 * constGravity) *Time.deltaTime;
-            onAirTime = 0;
+            power = jumpSpeed;
+            gravity.y = power;
         }
-        else
+        if (!onGround)
         {
-            //v = 1/2*g*t^2      
-            if (!onGround)
-            {
-                onAirTime += Time.deltaTime;
-                gravity.y = 0.5f * constGravity * onAirTime * onAirTime;
-            }
+            power -= Time.deltaTime * fallSpeed;
+            gravity.y = power;
         }
         //Sprint
         if (Input.GetKey(KeyCode.LeftShift))
             Move *= 2.0f;
 
-        Controller.Move(Move);
-        Controller.Move(gravity);
+        controller.Move(Move);
+        controller.Move(gravity);
     }
 }
